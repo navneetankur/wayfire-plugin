@@ -109,32 +109,35 @@ class faketile_t : public wf::plugin_interface_t
 				nothing("down:",view->to_string(), view->get_title(), view->get_app_id(), viewg.x,"y", viewg.y,"w", viewg.width,"h", viewg.height);
 			}
 		}
-		if(leftHeight == viewg.height) {
+		if(fuzzyCompare(leftHeight, viewg.height)) {
 			for(auto v:leftViews) {
 				auto vg = v->get_wm_geometry();
 				v->resize(vg.width + viewg.width, vg.height);
 			}
 		}
-		else if(rightHeight == viewg.height) {
+		else if(fuzzyCompare(rightHeight, viewg.height)) {
 			for(auto v:rightViews) {
 				auto vg = v->get_wm_geometry();
 				v->resize(vg.width + viewg.width, vg.height);
 				v->move(viewg.x, vg.y);
 			}
 		}
-		else if(upWidth == viewg.width) {
+		else if(fuzzyCompare(upWidth, viewg.width)) {
 			for(auto v:upViews) {
 				auto vg = v->get_wm_geometry();
 				v->resize(vg.width, vg.height + viewg.height);
 			}
 		}
-		else if(downWidth == viewg.width) {
+		else if(fuzzyCompare(downWidth, viewg.width)) {
 			for(auto v:downViews) {
 				auto vg = v->get_wm_geometry();
 				v->resize(vg.width, vg.height + viewg.height);
 				v->move(vg.x, viewg.y);
 			}
 		}
+	}
+	bool fuzzyCompare(int a, int b, int fuzz=10) {
+		return a < b+fuzz && a > b-fuzz;
 	}
 	bool isInsideInclusive(int value, int lowerBound, int length) {
 		return value >= lowerBound && value <= length + lowerBound;
