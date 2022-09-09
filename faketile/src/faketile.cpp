@@ -27,7 +27,7 @@ class faketile_t : public wf::plugin_interface_t
         /* auto workarea = output->workspace->get_workarea(); */
 
     };
-    wf::signal_connection_t removing_cb = [=] (wf::signal_data_t *data) {
+    wf::signal_connection_t removed_cb = [=] (wf::signal_data_t *data) {
         auto view = get_signaled_view(data);
 		LOGD("unmapped: ", view->to_string());
 		static constexpr uint32_t interesting_layers = wf::LAYER_WORKSPACE | wf::LAYER_MINIMIZED;
@@ -42,12 +42,19 @@ class faketile_t : public wf::plugin_interface_t
         auto ev   = (wf::view_change_workspace_signal*)(data);
         auto view = get_signaled_view(data);
 		if(!ev->old_workspace_valid) return;
-		LOGD("ws changed: ", ev->from.x, ev->from.y, ev->to.x, ev->to.y);
+		LOGD("ws changed: ", ev->from.x,",", ev->from.y,",", ev->to.x,",", ev->to.y);
+		LOGD("current ws is ",this->output->workspace->get_current_workspace());
 
 		static constexpr uint32_t interesting_layers = wf::LAYER_WORKSPACE | wf::LAYER_MINIMIZED;
 		auto views = this->output->workspace->get_views_on_workspace(
                     ev->from, interesting_layers);
-		retileAdded(views,view);
+		retileRemoved(views,view);
+
+		//these below lines causes the view to stay on from workspace.
+		//Need to find why, or leave them commented.
+		/* views = this->output->workspace->get_views_on_workspace( */
+                    /* ev->to, interesting_layers); */
+		/* retileAdded(views,view); */
 	};
 
     wf::signal_connection_t minimized_cb = [=] (wf::signal_data_t *data) {
@@ -65,10 +72,17 @@ class faketile_t : public wf::plugin_interface_t
 
 	void retileRemoved(std::vector<wayfire_view> views, wayfire_view view) {
 		auto viewg = view->get_wm_geometry();
+		LOGD("retile removed: ", view->to_string());
+		LOGD("it was:",view->to_string(), view->get_title(), view->get_app_id(), viewg.x,"y", viewg.y,"w", viewg.width,"h", viewg.height);
+		auto temp1 = view->get_bounding_box();
+		auto temp2 = view->get_output_geometry();
+		LOGD("bb was:",view->to_string(), view->get_title(), view->get_app_id(), temp1.x,"y", temp1.y,"w", temp1.width,"h", temp1.height);
+		LOGD("og was:",view->to_string(), view->get_title(), view->get_app_id(), temp2.x,"y", temp2.y,"w", temp2.width,"h", temp2.height);
 		for(auto v: views) {
 			if(v == view) continue;
 
 			auto vg = v->get_wm_geometry();
+			LOGD(v->to_string(), v->get_title(), v->get_app_id(), vg.x,"y", vg.y,"w", vg.width,"h", vg.height);
 			if(vg.height == viewg.height && vg.y == viewg.y) {
 				if(vg.x + vg.width == viewg.x) {
 					v->resize(vg.width + viewg.width, vg.height);
@@ -104,6 +118,7 @@ class faketile_t : public wf::plugin_interface_t
 	}
 
 	void retileAddedAfter3(std::vector<wayfire_view> views, wayfire_view view) {
+		LOGD("retile addedafter3: ", view->to_string());
 		int size = views.size();
 		unsigned int max_area=0;
 		wayfire_view max_view = nullptr;
@@ -122,11 +137,15 @@ class faketile_t : public wf::plugin_interface_t
 		if(max_view == nullptr || max_area == 0) return;
 		auto max_view_g = max_view->get_wm_geometry();
 		if(max_view_g.width > max_view_g.height) {
-			view->set_geometry({max_view_g.width/2 + max_view_g.x, max_view_g.y, max_view_g.width/2, max_view_g.height});
+			/* view->set_geometry({max_view_g.width/2 + max_view_g.x, max_view_g.y, max_view_g.width/2, max_view_g.height}); */
+			view->resize(max_view_g.width/2, max_view_g.height);
+			view->move(max_view_g.width/2 + max_view_g.x, max_view_g.y);
 			max_view->resize(max_view_g.width/2, max_view_g.height);
 		}
 		else {
-			view->set_geometry({max_view_g.x, max_view_g.y + max_view_g.height/2, max_view_g.width, max_view_g.height/2});
+			/* view->set_geometry({max_view_g.x, max_view_g.y + max_view_g.height/2, max_view_g.width, max_view_g.height/2}); */
+			view->resize(max_view_g.width, max_view_g.height/2);
+			view->move(max_view_g.x, max_view_g.y + max_view_g.height/2);
 			max_view->resize(max_view_g.width, max_view_g.height/2);
 		}
 	}
@@ -181,7 +200,7 @@ class faketile_t : public wf::plugin_interface_t
     void init() override
     {
         output->connect_signal("view-mapped", &created_cb);
-        output->connect_signal("view-pre-unmapped", &removing_cb);
+        output->connect_signal("view-pre-unmapped", &removed_cb);
         output->connect_signal("view-minimized", &minimized_cb);
         output->connect_signal("view-change-workspace", &workspace_changed_cb);
     }
