@@ -10,7 +10,7 @@ class faketile_t : public wf::plugin_interface_t
     {
         auto ev   = (wf::view_mapped_signal*)(data);
         auto view = get_signaled_view(data);
-		LOGD("mapped: ", view->to_string());
+		nothing("mapped: ", view->to_string());
 
         if ((view->role != wf::VIEW_ROLE_TOPLEVEL) || view->parent ||
             view->fullscreen || view->tiled_edges || ev->is_positioned)
@@ -29,7 +29,7 @@ class faketile_t : public wf::plugin_interface_t
     };
     wf::signal_connection_t removed_cb = [=] (wf::signal_data_t *data) {
         auto view = get_signaled_view(data);
-		LOGD("unmapped: ", view->to_string());
+		nothing("unmapped: ", view->to_string());
 		static constexpr uint32_t interesting_layers = wf::LAYER_WORKSPACE | wf::LAYER_MINIMIZED;
 		auto views = this->output->workspace->get_views_on_workspace(
                     this->output->workspace->get_current_workspace(), interesting_layers);
@@ -42,8 +42,8 @@ class faketile_t : public wf::plugin_interface_t
         auto ev   = (wf::view_change_workspace_signal*)(data);
         auto view = get_signaled_view(data);
 		if(!ev->old_workspace_valid) return;
-		LOGD("ws changed: ", ev->from.x,",", ev->from.y,",", ev->to.x,",", ev->to.y);
-		LOGD("current ws is ",this->output->workspace->get_current_workspace());
+		nothing("ws changed: ", ev->from.x,",", ev->from.y,",", ev->to.x,",", ev->to.y);
+		nothing("current ws is ",this->output->workspace->get_current_workspace());
 
 		static constexpr uint32_t interesting_layers = wf::LAYER_WORKSPACE | wf::LAYER_MINIMIZED;
 		auto views = this->output->workspace->get_views_on_workspace(
@@ -60,7 +60,7 @@ class faketile_t : public wf::plugin_interface_t
     wf::signal_connection_t minimized_cb = [=] (wf::signal_data_t *data) {
         auto ev   = (wf::view_minimized_signal*)(data);
         auto view = get_signaled_view(data);
-		LOGD("minimized: ", view->to_string());
+		nothing("minimized: ", view->to_string());
 		static constexpr uint32_t interesting_layers = wf::LAYER_WORKSPACE | wf::LAYER_MINIMIZED;
 		auto views = this->output->workspace->get_views_on_workspace(
                     this->output->workspace->get_current_workspace(), interesting_layers);
@@ -70,19 +70,25 @@ class faketile_t : public wf::plugin_interface_t
 			retileAdded(views, view);
 	};
 
+ 
+	template <typename T, typename... Types>
+	void nothing(T var1, Types... var2)
+	{
+	}
+
 	void retileRemoved(std::vector<wayfire_view> views, wayfire_view view) {
 		auto viewg = view->get_wm_geometry();
-		LOGD("retile removed: ", view->to_string());
-		LOGD("it was:",view->to_string(), view->get_title(), view->get_app_id(), viewg.x,"y", viewg.y,"w", viewg.width,"h", viewg.height);
+		nothing("retile removed: ", view->to_string());
+		nothing("it was:",view->to_string(), view->get_title(), view->get_app_id(), viewg.x,"y", viewg.y,"w", viewg.width,"h", viewg.height);
 		auto temp1 = view->get_bounding_box();
 		auto temp2 = view->get_output_geometry();
-		LOGD("bb was:",view->to_string(), view->get_title(), view->get_app_id(), temp1.x,"y", temp1.y,"w", temp1.width,"h", temp1.height);
-		LOGD("og was:",view->to_string(), view->get_title(), view->get_app_id(), temp2.x,"y", temp2.y,"w", temp2.width,"h", temp2.height);
+		nothing("bb was:",view->to_string(), view->get_title(), view->get_app_id(), temp1.x,"y", temp1.y,"w", temp1.width,"h", temp1.height);
+		nothing("og was:",view->to_string(), view->get_title(), view->get_app_id(), temp2.x,"y", temp2.y,"w", temp2.width,"h", temp2.height);
 		for(auto v: views) {
 			if(v == view) continue;
 
 			auto vg = v->get_wm_geometry();
-			LOGD(v->to_string(), v->get_title(), v->get_app_id(), vg.x,"y", vg.y,"w", vg.width,"h", vg.height);
+			nothing(v->to_string(), v->get_title(), v->get_app_id(), vg.x,"y", vg.y,"w", vg.width,"h", vg.height);
 			if(vg.height == viewg.height && vg.y == viewg.y) {
 				if(vg.x + vg.width == viewg.x) {
 					v->resize(vg.width + viewg.width, vg.height);
@@ -118,14 +124,14 @@ class faketile_t : public wf::plugin_interface_t
 	}
 
 	void retileAddedAfter3(std::vector<wayfire_view> views, wayfire_view view) {
-		LOGD("retile addedafter3: ", view->to_string());
+		nothing("retile addedafter3: ", view->to_string());
 		int size = views.size();
 		unsigned int max_area=0;
 		wayfire_view max_view = nullptr;
 		for(int i=0; i<size; i++) {
 			auto v = views[i];
 			auto vg = v->get_wm_geometry();
-			LOGD(v->to_string(), v->get_title(), v->get_app_id(), vg.x,"y", vg.y,"w", vg.width,"h", vg.height);
+			nothing(v->to_string(), v->get_title(), v->get_app_id(), vg.x,"y", vg.y,"w", vg.width,"h", vg.height);
 			if(v == view) continue;
 			if(vg.x == 0 && vg.y == 0) continue;
 			unsigned int area = vg.width * vg.height;
@@ -153,41 +159,41 @@ class faketile_t : public wf::plugin_interface_t
 		int size = views.size();
 		if(size > 3) return;
 		auto workarea = output->workspace->get_workarea();
-		LOGD("No. views: ",size);
+		nothing("No. views: ",size);
 		for(int i=size; i>0; i--) {
 			auto v = views[i-1];
 			auto vg = v->get_wm_geometry();
-			LOGD(v->to_string(), v->get_title(), v->get_app_id(), vg.x,"y", vg.y,"w", vg.width,"h", vg.height);
+			nothing(v->to_string(), v->get_title(), v->get_app_id(), vg.x,"y", vg.y,"w", vg.width,"h", vg.height);
 			if(size == 1) {
-				LOGD("view ",i," set to ",workarea.width,"x",workarea.height," at ",0,",","0");
+				nothing("view ",i," set to ",workarea.width,"x",workarea.height," at ",0,",","0");
 				v->resize(workarea.width, workarea.height);
 				v->move(0, 0);
 			}
 			if(size == 2) {
 				if(i == size) {
-					LOGD("view ",i," set to ",workarea.width/2,"x",workarea.height," at ",0,",","0");
+					nothing("view ",i," set to ",workarea.width/2,"x",workarea.height," at ",0,",","0");
 					v->resize(workarea.width/2, workarea.height);
 					v->move(0, 0);
 				}
 				else {
-					LOGD("view ",i," set to ",workarea.width/2,"x",workarea.height," at ",workarea.width/2,",","0");
+					nothing("view ",i," set to ",workarea.width/2,"x",workarea.height," at ",workarea.width/2,",","0");
 					v->resize(workarea.width/2, workarea.height);
 					v->move(workarea.width/2, 0);
 				}
 			}
 			if(size == 3) {
 				if(i == size) {
-					LOGD("view ",i," set to ",workarea.width/2,"x",workarea.height," at ",0,",","0");
+					nothing("view ",i," set to ",workarea.width/2,"x",workarea.height," at ",0,",","0");
 					v->resize(workarea.width/2, workarea.height);
 					v->move(0, 0);
 				}
 				else if(i == size-1) {
-					LOGD("view ",i," set to ",workarea.width/2,"x",workarea.height/2," at ",workarea.width/2,",","0");
+					nothing("view ",i," set to ",workarea.width/2,"x",workarea.height/2," at ",workarea.width/2,",","0");
 					v->resize(workarea.width/2, workarea.height/2);
 					v->move(workarea.width/2, 0);
 				}
 				else {
-					LOGD("view ",i," set to ",workarea.width/2,"x",workarea.height/2," at ",workarea.width/2,",",workarea.height/2);
+					nothing("view ",i," set to ",workarea.width/2,"x",workarea.height/2," at ",workarea.width/2,",",workarea.height/2);
 					v->resize(workarea.width/2, workarea.height/2);
 					v->move(workarea.width/2, workarea.height/2);
 				}
