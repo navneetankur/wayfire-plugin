@@ -74,45 +74,70 @@ class faketile_t : public wf::plugin_interface_t
 	template <typename T, typename... Types>
 	void nothing(T var1, Types... var2)
 	{
+		/* LOGI(var1,var2...); */
 	}
 
 	void retileRemoved(std::vector<wayfire_view> views, wayfire_view view) {
 		auto viewg = view->get_wm_geometry();
 		nothing("retile removed: ", view->to_string());
 		nothing("it was:",view->to_string(), view->get_title(), view->get_app_id(), viewg.x,"y", viewg.y,"w", viewg.width,"h", viewg.height);
-		auto temp1 = view->get_bounding_box();
-		auto temp2 = view->get_output_geometry();
-		nothing("bb was:",view->to_string(), view->get_title(), view->get_app_id(), temp1.x,"y", temp1.y,"w", temp1.width,"h", temp1.height);
-		nothing("og was:",view->to_string(), view->get_title(), view->get_app_id(), temp2.x,"y", temp2.y,"w", temp2.width,"h", temp2.height);
+		std::vector<wayfire_view> leftViews, rightViews, upViews, downViews;
+		int leftHeight = 0, rightHeight = 0, upWidth = 0, downWidth = 0;
 		for(auto v: views) {
 			if(v == view) continue;
 
 			auto vg = v->get_wm_geometry();
-			nothing(v->to_string(), v->get_title(), v->get_app_id(), vg.x,"y", vg.y,"w", vg.width,"h", vg.height);
-			if(vg.height == viewg.height && vg.y == viewg.y) {
-				if(vg.x + vg.width == viewg.x) {
-					v->resize(vg.width + viewg.width, vg.height);
-					return;
-				}
-				else if(viewg.x + viewg.width == vg.x) {
-					v->resize(vg.width + viewg.width, vg.height);
-					v->move(viewg.x, viewg.y);
-					return;
-				}
+			nothing("curretn: ",v->to_string(), v->get_title(), v->get_app_id(), vg.x,"y", vg.y,"w", vg.width,"h", vg.height);
+			if(vg.x + vg.width == viewg.x && isInsideInclusive(vg.y, viewg.y, viewg.height)) { 
+				leftViews.push_back(v); 
+				leftHeight += vg.height;
+				nothing("left:",view->to_string(), view->get_title(), view->get_app_id(), viewg.x,"y", viewg.y,"w", viewg.width,"h", viewg.height);
 			}
-			else if(vg.width == viewg.width && vg.x == viewg.x) {
-				if(vg.y + vg.height == viewg.y) {
-					v->resize(vg.width, vg.height + viewg.height);
-					return;
-				}
-				else if(viewg.y + viewg.height == vg.y) {
-					v->resize(vg.width, vg.height+viewg.height);
-					v->move(viewg.x, viewg.y);
-					return;
-				}
+			else if(vg.x == viewg.x + viewg.width && isInsideInclusive(vg.y, viewg.y, viewg.height)) {
+				rightViews.push_back(v);
+				rightHeight += vg.height;
+				nothing("right:",view->to_string(), view->get_title(), view->get_app_id(), viewg.x,"y", viewg.y,"w", viewg.width,"h", viewg.height);
 			}
-
+			else if(vg.y + vg.height == viewg.y && isInsideInclusive(vg.x, viewg.x, viewg.width)) {
+				upViews.push_back(v); 
+				upWidth += vg.width;
+				nothing("up:",view->to_string(), view->get_title(), view->get_app_id(), viewg.x,"y", viewg.y,"w", viewg.width,"h", viewg.height);
+			}
+			else if(vg.y == viewg.y + viewg.height && isInsideInclusive(vg.x, viewg.x, viewg.width)) {
+				downViews.push_back(v);
+				downWidth += vg.width;
+				nothing("down:",view->to_string(), view->get_title(), view->get_app_id(), viewg.x,"y", viewg.y,"w", viewg.width,"h", viewg.height);
+			}
 		}
+		if(leftHeight == viewg.height) {
+			for(auto v:leftViews) {
+				auto vg = v->get_wm_geometry();
+				v->resize(vg.width + viewg.width, vg.height);
+			}
+		}
+		else if(rightHeight == viewg.height) {
+			for(auto v:rightViews) {
+				auto vg = v->get_wm_geometry();
+				v->resize(vg.width + viewg.width, vg.height);
+				v->move(viewg.x, vg.y);
+			}
+		}
+		else if(upWidth == viewg.width) {
+			for(auto v:upViews) {
+				auto vg = v->get_wm_geometry();
+				v->resize(vg.width, vg.height + viewg.height);
+			}
+		}
+		else if(downWidth == viewg.width) {
+			for(auto v:downViews) {
+				auto vg = v->get_wm_geometry();
+				v->resize(vg.width, vg.height + viewg.height);
+				v->move(vg.x, viewg.y);
+			}
+		}
+	}
+	bool isInsideInclusive(int value, int lowerBound, int length) {
+		return value >= lowerBound && value <= length + lowerBound;
 	}
 	void retileAdded(std::vector<wayfire_view> views, wayfire_view view) {
 		if(views.size() > 3) {
