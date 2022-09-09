@@ -1,0 +1,22 @@
+pkgname=wayfire-plugin-faketile
+pkgver=1
+pkgrel=1
+pkgdesc="Wayfire faketile."
+arch=(x86_64)
+depends=(wayfire wayfire-plugins-extra)
+makedepends=(meson ninja pkg-config git cmake wayland-protocols glm)
+sha256sums=('SKIP')
+
+build() {
+	cd ..
+	pwd
+	ls -l
+	meson --buildtype debug --prefix=/usr build
+	ninja -C build
+}
+
+package() {
+	cd ..
+	DESTDIR="${pkgdir}" ninja -C build install
+}
+

@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<wayfire>
+	<plugin name="faketile">
+	<_short>Fake Tile</_short>
+	</plugin>
+</wayfire>
