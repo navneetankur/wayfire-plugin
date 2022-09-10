@@ -3,7 +3,7 @@ pkgver=1
 pkgrel=1
 pkgdesc="Wayfire faketile."
 arch=(x86_64)
-depends=(wayfire wayfire-plugins-extra)
+depends=(wayfire)
 makedepends=(meson ninja pkg-config git cmake wayland-protocols glm)
 sha256sums=('SKIP')
 
