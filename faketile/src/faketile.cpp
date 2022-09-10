@@ -38,25 +38,6 @@ class faketile_t : public wf::plugin_interface_t
 
 	};
 
-    wf::signal_connection_t workspace_changed_cb = [=] (wf::signal_data_t *data) {
-        auto ev   = (wf::view_change_workspace_signal*)(data);
-        auto view = get_signaled_view(data);
-		if(!ev->old_workspace_valid) return;
-		nothing("ws changed: ", ev->from.x,",", ev->from.y,",", ev->to.x,",", ev->to.y);
-		nothing("current ws is ",this->output->workspace->get_current_workspace());
-
-		static constexpr uint32_t interesting_layers = wf::LAYER_WORKSPACE | wf::LAYER_MINIMIZED;
-		auto views = this->output->workspace->get_views_on_workspace(
-                    ev->from, interesting_layers);
-		retileRemoved(views,view);
-
-		//these below lines causes the view to stay on from workspace.
-		//Need to find why, or leave them commented.
-		/* views = this->output->workspace->get_views_on_workspace( */
-                    /* ev->to, interesting_layers); */
-		/* retileAdded(views,view); */
-	};
-
     wf::signal_connection_t minimized_cb = [=] (wf::signal_data_t *data) {
         auto ev   = (wf::view_minimized_signal*)(data);
         auto view = get_signaled_view(data);
@@ -236,7 +217,6 @@ class faketile_t : public wf::plugin_interface_t
         output->connect_signal("view-mapped", &created_cb);
         output->connect_signal("view-pre-unmapped", &removed_cb);
         output->connect_signal("view-minimized", &minimized_cb);
-        output->connect_signal("view-change-workspace", &workspace_changed_cb);
     }
 
 
