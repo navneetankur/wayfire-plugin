@@ -11,7 +11,7 @@ build() {
 	cd ..
 	pwd
 	ls -l
-	meson --buildtype debug --prefix=/usr build
+	meson --buildtype release --prefix=/usr build
 	ninja -C build
 }
 

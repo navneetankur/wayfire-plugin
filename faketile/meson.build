@@ -4,11 +4,6 @@ project(
 	version: '0.1',
 	license: 'MIT',
 	meson_version: '>=0.51.0',
-	default_options: [
-		'cpp_std=c++17',
-		'warning_level=2',
-		'werror=false',
-	],
 )
 
 wayfire = dependency('wayfire')
@@ -20,12 +15,3 @@ add_project_link_arguments(['-rdynamic'], language:'cpp')
 
 subdir('src')
 subdir('metadata')
-
-summary = [
-	'',
-	'----------------',
-	'wayfire-plugins-ammen99 @0@'.format(meson.project_version()),
-	'----------------',
-	''
-]
-message('\n'.join(summary))

@@ -74,7 +74,7 @@ class faketile_t : public wf::plugin_interface_t
 	template <typename T, typename... Types>
 	inline void nothing(T var1, Types... var2)
 	{
-		/* LOGI(var1,var2...); */
+		LOGI(var1,var2...);
 	}
 
 	void retileRemoved(std::vector<wayfire_view> views, wayfire_view view) {
@@ -91,22 +91,22 @@ class faketile_t : public wf::plugin_interface_t
 			if(isEqualish(vg.x + vg.width, viewg.x) && isInsideInclusive(vg.y, viewg.y, viewg.height)) { 
 				leftViews.push_back(v); 
 				leftHeight += vg.height;
-				nothing("left:",view->to_string(), view->get_title(), view->get_app_id(), viewg.x,"y", viewg.y,"w", viewg.width,"h", viewg.height);
+				nothing("left:",v->to_string(), v->get_title(), v->get_app_id(), vg.x,"y", vg.y,"w", vg.width,"h", vg.height);
 			}
 			else if(isEqualish(vg.x, viewg.x + viewg.width) && isInsideInclusive(vg.y, viewg.y, viewg.height)) {
 				rightViews.push_back(v);
 				rightHeight += vg.height;
-				nothing("right:",view->to_string(), view->get_title(), view->get_app_id(), viewg.x,"y", viewg.y,"w", viewg.width,"h", viewg.height);
+				nothing("right:",v->to_string(), v->get_title(), v->get_app_id(), vg.x,"y", vg.y,"w", vg.width,"h", vg.height);
 			}
 			else if(isEqualish(vg.y + vg.height, viewg.y) && isInsideInclusive(vg.x, viewg.x, viewg.width)) {
 				upViews.push_back(v); 
 				upWidth += vg.width;
-				nothing("up:",view->to_string(), view->get_title(), view->get_app_id(), viewg.x,"y", viewg.y,"w", viewg.width,"h", viewg.height);
+				nothing("up:",v->to_string(), v->get_title(), v->get_app_id(), vg.x,"y", vg.y,"w", vg.width,"h", vg.height);
 			}
 			else if(isEqualish(vg.y, viewg.y + viewg.height) && isInsideInclusive(vg.x, viewg.x, viewg.width)) {
 				downViews.push_back(v);
 				downWidth += vg.width;
-				nothing("down:",view->to_string(), view->get_title(), view->get_app_id(), viewg.x,"y", viewg.y,"w", viewg.width,"h", viewg.height);
+				nothing("down:",v->to_string(), v->get_title(), v->get_app_id(), vg.x,"y", vg.y,"w", vg.width,"h", vg.height);
 			}
 		}
 		if(isEqualish(leftHeight, viewg.height)) {
@@ -139,8 +139,8 @@ class faketile_t : public wf::plugin_interface_t
 	inline bool isEqualish(int a, int b, int fuzz=10) {
 		return a < b+fuzz && a > b-fuzz;
 	}
-	bool isInsideInclusive(int value, int lowerBound, int length) {
-		return value >= lowerBound && value <= length + lowerBound;
+	bool isInsideInclusive(int value, int lowerBound, int length, int fuzz=10) {
+		return value >= lowerBound-fuzz && value <= length + lowerBound + fuzz;
 	}
 	void retileAdded(std::vector<wayfire_view> views, wayfire_view view) {
 		if(views.size() > 3) {
