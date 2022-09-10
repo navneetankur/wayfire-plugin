@@ -72,7 +72,7 @@ class faketile_t : public wf::plugin_interface_t
 
  
 	template <typename T, typename... Types>
-	void nothing(T var1, Types... var2)
+	inline void nothing(T var1, Types... var2)
 	{
 		/* LOGI(var1,var2...); */
 	}
@@ -136,7 +136,7 @@ class faketile_t : public wf::plugin_interface_t
 			}
 		}
 	}
-	bool fuzzyCompare(int a, int b, int fuzz=10) {
+	inline bool fuzzyCompare(int a, int b, int fuzz=10) {
 		return a < b+fuzz && a > b-fuzz;
 	}
 	bool isInsideInclusive(int value, int lowerBound, int length) {
