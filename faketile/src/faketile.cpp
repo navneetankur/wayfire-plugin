@@ -88,47 +88,47 @@ class faketile_t : public wf::plugin_interface_t
 
 			auto vg = v->get_wm_geometry();
 			nothing("curretn: ",v->to_string(), v->get_title(), v->get_app_id(), vg.x,"y", vg.y,"w", vg.width,"h", vg.height);
-			if(vg.x + vg.width == viewg.x && isInsideInclusive(vg.y, viewg.y, viewg.height)) { 
+			if(isEqualish(vg.x + vg.width, viewg.x) && isInsideInclusive(vg.y, viewg.y, viewg.height)) { 
 				leftViews.push_back(v); 
 				leftHeight += vg.height;
 				nothing("left:",view->to_string(), view->get_title(), view->get_app_id(), viewg.x,"y", viewg.y,"w", viewg.width,"h", viewg.height);
 			}
-			else if(vg.x == viewg.x + viewg.width && isInsideInclusive(vg.y, viewg.y, viewg.height)) {
+			else if(isEqualish(vg.x, viewg.x + viewg.width) && isInsideInclusive(vg.y, viewg.y, viewg.height)) {
 				rightViews.push_back(v);
 				rightHeight += vg.height;
 				nothing("right:",view->to_string(), view->get_title(), view->get_app_id(), viewg.x,"y", viewg.y,"w", viewg.width,"h", viewg.height);
 			}
-			else if(vg.y + vg.height == viewg.y && isInsideInclusive(vg.x, viewg.x, viewg.width)) {
+			else if(isEqualish(vg.y + vg.height, viewg.y) && isInsideInclusive(vg.x, viewg.x, viewg.width)) {
 				upViews.push_back(v); 
 				upWidth += vg.width;
 				nothing("up:",view->to_string(), view->get_title(), view->get_app_id(), viewg.x,"y", viewg.y,"w", viewg.width,"h", viewg.height);
 			}
-			else if(vg.y == viewg.y + viewg.height && isInsideInclusive(vg.x, viewg.x, viewg.width)) {
+			else if(isEqualish(vg.y, viewg.y + viewg.height) && isInsideInclusive(vg.x, viewg.x, viewg.width)) {
 				downViews.push_back(v);
 				downWidth += vg.width;
 				nothing("down:",view->to_string(), view->get_title(), view->get_app_id(), viewg.x,"y", viewg.y,"w", viewg.width,"h", viewg.height);
 			}
 		}
-		if(fuzzyCompare(leftHeight, viewg.height)) {
+		if(isEqualish(leftHeight, viewg.height)) {
 			for(auto v:leftViews) {
 				auto vg = v->get_wm_geometry();
 				v->resize(vg.width + viewg.width, vg.height);
 			}
 		}
-		else if(fuzzyCompare(rightHeight, viewg.height)) {
+		else if(isEqualish(rightHeight, viewg.height)) {
 			for(auto v:rightViews) {
 				auto vg = v->get_wm_geometry();
 				v->resize(vg.width + viewg.width, vg.height);
 				v->move(viewg.x, vg.y);
 			}
 		}
-		else if(fuzzyCompare(upWidth, viewg.width)) {
+		else if(isEqualish(upWidth, viewg.width)) {
 			for(auto v:upViews) {
 				auto vg = v->get_wm_geometry();
 				v->resize(vg.width, vg.height + viewg.height);
 			}
 		}
-		else if(fuzzyCompare(downWidth, viewg.width)) {
+		else if(isEqualish(downWidth, viewg.width)) {
 			for(auto v:downViews) {
 				auto vg = v->get_wm_geometry();
 				v->resize(vg.width, vg.height + viewg.height);
@@ -136,7 +136,7 @@ class faketile_t : public wf::plugin_interface_t
 			}
 		}
 	}
-	inline bool fuzzyCompare(int a, int b, int fuzz=10) {
+	inline bool isEqualish(int a, int b, int fuzz=10) {
 		return a < b+fuzz && a > b-fuzz;
 	}
 	bool isInsideInclusive(int value, int lowerBound, int length) {
